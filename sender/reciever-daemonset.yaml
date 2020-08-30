@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: reciever
+  namespace: multicast-test
+spec:
+  selector:
+    matchLabels:
+      app: reciever
+  template:
+    metadata:
+      labels:
+        app: reciever
+    spec:
+      containers:
+        - name: reciever
+          image: mc-reciever:latest
+          ports:
+            - containerPort: 12121
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: MULTICAST_GROUP
+              value: "224.3.29.71"
+            - name: SOCK_PORT
+              value: "12121"

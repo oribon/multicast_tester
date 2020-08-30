@@ -1,0 +1,34 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: test-multicast
+  namespace: multicast-test
+spec:
+  schedule: '0 15 * * *'
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: sender
+              image: mc-sender:latest
+              ports:
+                - containerPort: 12121
+              env: 
+                - name: NODE_NAME
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: spec.nodeName
+                - name: MULTICAST_GROUP
+                  value: "224.3.29.71"
+                - name: SOCK_PORT
+                  value: "12121"
+              envFrom:
+                - secretRef:
+                    name: "multicast-secret"
+              args:
+                - 'python'
+                - '-u'
+                - './sender.py'
+          restartPolicy: OnFailure
+          serviceAccount: "multicast-user"
